@@ -1,6 +1,6 @@
 const CACHE_NAME = 'nexus-v2';
 const STATIC_ASSETS = [
-  './smart-dashboard.html',
+  './index.html',
   './manifest.json',
   './nexus-icon.svg'
 ];
@@ -63,7 +63,7 @@ self.addEventListener('fetch', event => {
       }).catch(() => {
         // Offline fallback for navigation requests
         if (event.request.mode === 'navigate') {
-          return caches.match('./smart-dashboard.html');
+          return caches.match('./index.html');
         }
       });
     })
