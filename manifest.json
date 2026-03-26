@@ -2,7 +2,7 @@
   "name": "NEXUS Dashboard",
   "short_name": "NEXUS",
   "description": "Smart cyberpunk news & monitoring dashboard",
-  "start_url": "./smart-dashboard.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "landscape",
