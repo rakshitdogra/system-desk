@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NEXUS">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="nexus-icon.svg">
+<title>NEXUS DASHBOARD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050a12;--surface:#0a1628;--surface2:#0f1f3a;--border:rgba(0,220,255,0.14);--cyan:#00dcff;--cyan-dim:rgba(0,220,255,0.38);--amber:#ffb300;--amber-dim:rgba(255,179,0,0.38);--green:#00ff9d;--red:#ff4757;--text:#c8e6f5;--text-dim:rgba(200,230,245,0.44);--glow-c:0 0 12px rgba(0,220,255,0.7),0 0 28px rgba(0,220,255,0.22);--glow-a:0 0 12px rgba(255,179,0,0.7),0 0 28px rgba(255,179,0,0.22);--shadow:0 4px 40px rgba(0,0,0,0.6),inset 0 1px 0 rgba(0,220,255,0.07);--gc:rgba(0,220,255,0.03);--bg1:rgba(0,60,120,0.28);--bg2:rgba(0,30,80,0.22)}
+html[data-theme=light]{--bg:#dce8f2;--surface:#f0f7fd;--surface2:#e2eef8;--border:rgba(0,100,160,0.18);--cyan:#0077aa;--cyan-dim:rgba(0,119,170,0.35);--amber:#b86800;--amber-dim:rgba(184,104,0,0.35);--green:#007744;--red:#cc2233;--text:#0f2030;--text-dim:rgba(15,32,48,0.5);--glow-c:0 0 8px rgba(0,119,170,0.35);--glow-a:0 0 8px rgba(184,104,0,0.35);--shadow:0 4px 24px rgba(0,60,120,0.12),inset 0 1px 0 rgba(0,119,170,0.1);--gc:rgba(0,100,160,0.04);--bg1:rgba(180,220,255,0.45);--bg2:rgba(200,230,255,0.3)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;transition:background .35s,color .35s}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--gc) 1px,transparent 1px),linear-gradient(90deg,var(--gc) 1px,transparent 1px);background-size:40px 40px;animation:gridShift 22s linear infinite;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 65% 55% at 12% 50%,var(--bg1) 0%,transparent 68%),radial-gradient(ellipse 50% 40% at 88% 50%,var(--bg2) 0%,transparent 68%);pointer-events:none;z-index:0;transition:background .35s}
+@keyframes gridShift{from{background-position:0 0}to{background-position:40px 40px}}
+#app{position:relative;z-index:1;width:100vw;height:100vh;display:grid;grid-template-columns:284px 1fr;gap:9px;padding:9px 9px 25px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;position:relative;transition:background .35s,border-color .35s}
+.panel::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan-dim),transparent)}
+.corner{position:absolute;width:11px;height:11px;border-color:var(--cyan-dim);border-style:solid;opacity:.65;pointer-events:none}
+.corner.tl{top:5px;left:5px;border-width:1px 0 0 1px}.corner.tr{top:5px;right:5px;border-width:1px 1px 0 0}.corner.bl{bottom:5px;left:5px;border-width:0 0 1px 1px}.corner.br{bottom:5px;right:5px;border-width:0 1px 1px 0}
+/* LEFT */
+#left-panel{display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+#left-panel::-webkit-scrollbar{width:2px}
+#left-panel::-webkit-scrollbar-thumb{background:var(--cyan-dim);border-radius:2px}
+.dsec{flex-shrink:0;border-bottom:1px solid var(--border);transition:opacity .2s,background .2s;position:relative}
+.dsec.drag-over{background:rgba(0,220,255,0.05);border-top:2px solid var(--cyan)}
+.dsec.dragging{opacity:.4}
+.drag-handle{display:flex;align-items:center;justify-content:space-between;padding:4px 12px 2px;font-family:'Share Tech Mono',monospace;font-size:.57rem;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase;cursor:grab;user-select:none}
+.drag-handle:active{cursor:grabbing}
+.drag-handle::before{content:attr(data-label)}
+.grip{font-size:.85rem;opacity:.35;letter-spacing:-2px;transition:opacity .2s}
+.drag-handle:hover .grip{opacity:.9;color:var(--cyan)}
+.drag-handle::after{content:'';flex:1;height:1px;margin:0 8px;background:linear-gradient(90deg,var(--border),transparent)}
+/* CLOCK */
+#clock-section{padding:12px 14px 10px;text-align:center}
+#time-display{font-family:'Orbitron',monospace;font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:900;color:var(--cyan);text-shadow:var(--glow-c);letter-spacing:.04em;line-height:1;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.86}}
+#colon-blink{animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+#date-display{margin-top:4px;font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);text-shadow:var(--glow-a)}
+#day-display{font-size:.63rem;letter-spacing:.28em;color:var(--text-dim);margin-top:1px}
+/* WEATHER */
+#weather-section{padding:6px 13px 8px}
+#weather-main{display:flex;align-items:center;justify-content:space-between}
+#weather-icon{font-size:1.75rem;line-height:1}
+#weather-temp{font-family:'Orbitron',monospace;font-size:1.55rem;font-weight:700;color:var(--amber);text-shadow:var(--glow-a)}
+#weather-desc{font-size:.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em}
+#weather-location{font-size:.62rem;color:var(--cyan);margin-top:1px}
+#weather-details{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:5px}
+.ws{background:var(--surface2);border-radius:5px;padding:3px 7px;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);display:flex;justify-content:space-between}
+.ws span:last-child{color:var(--text)}
+#wx-row{display:flex;gap:4px;margin-top:5px}
+#wx-city{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.59rem;padding:4px 7px;outline:none}
+#wx-city:focus{border-color:var(--cyan-dim)}
+#wx-btn{background:transparent;border:1px solid var(--cyan-dim);color:var(--cyan);border-radius:6px;font-size:.57rem;padding:4px 9px;cursor:pointer;font-family:'Share Tech Mono',monospace;transition:all .2s}
+#wx-btn:hover{background:var(--cyan-dim)}
+#wx-status{font-size:.55rem;color:var(--text-dim);margin-top:3px;font-family:'Share Tech Mono',monospace}
+/* STATS */
+#stats-section{padding:4px 13px 7px}
+.stat-row{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.stat-label{font-family:'Share Tech Mono',monospace;font-size:.57rem;color:var(--text-dim);width:26px;text-align:right;flex-shrink:0}
+.stat-bar{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;border:1px solid var(--border)}
+.stat-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.stat-fill.c{background:linear-gradient(90deg,#005568,var(--cyan));box-shadow:0 0 5px var(--cyan)}
+.stat-fill.a{background:linear-gradient(90deg,#553800,var(--amber));box-shadow:0 0 5px var(--amber)}
+.stat-fill.g{background:linear-gradient(90deg,#005538,var(--green));box-shadow:0 0 5px var(--green)}
+.stat-val{font-family:'Share Tech Mono',monospace;font-size:.57rem;color:var(--text-dim);width:26px;flex-shrink:0}
+/* RSS */
+#rss-section{padding:5px 13px 8px;display:flex;flex-direction:column;overflow:hidden;min-height:130px}
+#rss-add-row{display:flex;gap:4px;margin-bottom:5px;flex-shrink:0}
+#rss-url-in{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.58rem;padding:5px 7px;outline:none}
+#rss-url-in::placeholder{color:var(--text-dim)}
+#rss-url-in:focus{border-color:var(--cyan-dim)}
+#rss-add-btn{background:transparent;border:1px solid var(--cyan);color:var(--cyan);border-radius:6px;padding:5px 9px;cursor:pointer;font-family:'Orbitron',monospace;font-size:.5rem;transition:all .2s;white-space:nowrap}
+#rss-add-btn:hover{background:var(--cyan);color:var(--bg)}
+#feed-list{display:flex;flex-direction:column;gap:3px;overflow-y:auto;flex:1}
+#feed-list::-webkit-scrollbar{width:2px}
+#feed-list::-webkit-scrollbar-thumb{background:var(--cyan-dim)}
+.feed-row{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;transition:border-color .2s;flex-shrink:0}
+.feed-row:hover{border-color:var(--cyan-dim)}
+.feed-row input[type=checkbox]{appearance:none;-webkit-appearance:none;width:11px;height:11px;border:1px solid var(--cyan-dim);border-radius:2px;background:transparent;cursor:pointer;flex-shrink:0;position:relative;transition:all .15s}
+.feed-row input[type=checkbox]:checked{background:var(--cyan);border-color:var(--cyan)}
+.feed-row input[type=checkbox]:checked::after{content:'✓';position:absolute;top:-1px;left:1px;font-size:8px;color:var(--bg);font-weight:900}
+.feed-name{flex:1;font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default}
+.feed-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:.65rem;padding:0 2px}
+/* RIGHT */
+#right-panel{display:flex;flex-direction:column}
+#news-header{padding:7px 13px 5px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px}
+#news-title{font-family:'Orbitron',monospace;font-size:.6rem;font-weight:700;letter-spacing:.2em;color:var(--cyan);white-space:nowrap}
+#news-hcontrols{display:flex;gap:5px;align-items:center}
+#article-count{font-family:'Share Tech Mono',monospace;font-size:.53rem;color:var(--text-dim);white-space:nowrap}
+.btn{background:transparent;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;border-radius:6px;padding:3px 9px;font-family:'Share Tech Mono',monospace;font-size:.55rem;transition:all .2s;white-space:nowrap}
+.btn:hover{border-color:var(--cyan-dim);color:var(--cyan)}
+.btn.primary{border-color:var(--cyan);color:var(--cyan)}
+.btn.primary:hover{background:var(--cyan);color:var(--bg);box-shadow:var(--glow-c)}
+.btn.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* TOGGLES */
+#toggle-strip{display:flex;gap:4px;align-items:center;padding:5px 13px 4px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.tog{display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px 3px 8px;font-family:'Share Tech Mono',monospace;font-size:.54rem;color:var(--text-dim);cursor:pointer;transition:all .2s;white-space:nowrap}
+.tog-dot{width:6px;height:6px;border-radius:50%;background:var(--text-dim);transition:background .2s;flex-shrink:0}
+.tog:hover{border-color:var(--cyan-dim);color:var(--text)}
+.tog.on{border-color:var(--cyan-dim);color:var(--cyan)}
+.tog.on .tog-dot{background:var(--cyan);box-shadow:0 0 5px var(--cyan)}
+.tog-sep{color:var(--border);font-size:.8rem;user-select:none}
+#pwa-btn{display:none;margin-left:auto;background:transparent;border:1px solid var(--amber-dim);color:var(--amber);border-radius:20px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.54rem;cursor:pointer;animation:amberpulse 2s ease-in-out infinite;white-space:nowrap}
+@keyframes amberpulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* CATEGORY TABS */
+#cat-tabs{display:flex;gap:0;padding:4px 13px 0;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+#cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{background:none;border:none;padding:4px 11px;margin-bottom:-1px;font-family:'Share Tech Mono',monospace;font-size:.57rem;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.cat-tab:hover{color:var(--text)}
+.cat-tab.active{color:var(--cyan);border-color:var(--cyan)}
+.cat-badge{background:var(--surface2);border-radius:8px;padding:1px 5px;font-size:.47rem;color:var(--text-dim);min-width:16px;text-align:center}
+.cat-tab.active .cat-badge{background:var(--cyan-dim);color:var(--cyan)}
+/* CATEGORY ACCENTS */
+.cat-accent-TECH{border-left-color:#00dcff!important}
+.cat-accent-POLITICS{border-left-color:#ff6b35!important}
+.cat-accent-SPORTS{border-left-color:#00ff9d!important}
+.cat-accent-FINANCE{border-left-color:#ffb300!important}
+.cat-accent-OTHER{border-left-color:#8888aa!important}
+/* NEWS FEED */
+#news-feed{flex:1;overflow-y:auto;padding:7px;display:grid;grid-template-columns:repeat(auto-fill,minmax(208px,1fr));grid-auto-rows:max-content;gap:7px;align-content:start}
+#news-feed::-webkit-scrollbar{width:3px}
+#news-feed::-webkit-scrollbar-thumb{background:var(--cyan-dim);border-radius:3px}
+.news-card{background:var(--surface2);border:1px solid var(--border);border-left:2px solid transparent;border-radius:8px;overflow:hidden;text-decoration:none;display:block;color:inherit;transition:all .22s ease;animation:cardIn .3s ease both}
+@keyframes cardIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.news-card:hover{border-color:var(--cyan-dim);background:var(--surface);transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,0,0,.35)}
+.card-img{width:100%;height:80px;object-fit:cover;display:block;background:var(--surface);border-bottom:1px solid var(--border)}
+.card-body{padding:7px 9px 8px}
+.card-src{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--amber);letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px;display:flex;align-items:center;gap:4px}
+.card-src::before{content:'▶';font-size:.36rem}
+.card-title{font-family:'Rajdhani',sans-serif;font-size:.78rem;font-weight:600;color:var(--text);line-height:1.32;margin-bottom:4px}
+.card-desc{font-family:'Rajdhani',sans-serif;font-size:.65rem;color:var(--text-dim);line-height:1.38;margin-bottom:4px}
+.card-date{font-family:'Share Tech Mono',monospace;font-size:.49rem;color:var(--text-dim)}
+/* COMPACT */
+body.compact .card-img{height:0;overflow:hidden;border:none}
+body.compact .card-desc{display:none}
+body.compact .card-body{padding:5px 8px 6px}
+body.compact .card-title{font-size:.73rem;margin-bottom:2px}
+body.compact #news-feed{grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:5px}
+/* NO-IMAGES */
+body.no-images .card-img{display:none}
+/* STATUS */
+#news-status{grid-column:1/-1;text-align:center;padding:30px 20px;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--cyan);line-height:1.9;white-space:pre-line}
+.blinking{animation:pulse 1.3s ease-in-out infinite}
+/* SCANLINE */
+#scanline{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.018) 3px,rgba(0,0,0,.018) 4px);pointer-events:none;z-index:100}
+html[data-theme=light] #scanline{display:none}
+/* STATUS BAR */
+#statusbar{position:fixed;bottom:0;left:0;right:0;height:22px;background:rgba(5,10,18,.93);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-family:'Share Tech Mono',monospace;font-size:.53rem;color:var(--text-dim);z-index:50;transition:background .35s}
+html[data-theme=light] #statusbar{background:rgba(220,232,242,.95)}
+.sdot{width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 5px var(--green);animation:blink 2s ease-in-out infinite;margin-right:4px}
+</style>
+</head>
+<body>
+<div id="scanline"></div>
+<div id="app">
+  <!-- LEFT PANEL -->
+  <div class="panel" id="left-panel">
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div class="dsec" id="ds-clock" draggable="true">
+      <div class="drag-handle" data-label="⬡ TIME"><span class="grip">⠿</span></div>
+      <div id="clock-section">
+        <div id="time-display"><span id="ch">00</span><span id="colon-blink">:</span><span id="cm">00</span><span style="font-size:.48em;opacity:.5">:<span id="cs">00</span></span></div>
+        <div id="date-display">—</div>
+        <div id="day-display">—</div>
+      </div>
+    </div>
+    <div class="dsec" id="ds-weather" draggable="true">
+      <div class="drag-handle" data-label="⬡ WEATHER"><span class="grip">⠿</span></div>
+      <div id="weather-section">
+        <div id="weather-main">
+          <div id="weather-icon">🌤</div>
+          <div style="text-align:right">
+            <div id="weather-temp">—°C</div>
+            <div id="weather-desc">Loading…</div>
+            <div id="weather-location">—</div>
+          </div>
+        </div>
+        <div id="weather-details">
+          <div class="ws"><span>HUM</span><span id="wd-h">—</span></div>
+          <div class="ws"><span>WIND</span><span id="wd-w">—</span></div>
+          <div class="ws"><span>FEEL</span><span id="wd-f">—</span></div>
+          <div class="ws"><span>VIS</span><span id="wd-v">—</span></div>
+        </div>
+        <div id="wx-row"><input id="wx-city" type="text" placeholder="city name…"/><button id="wx-btn">GO</button></div>
+        <div id="wx-status"></div>
+      </div>
+    </div>
+    <div class="dsec" id="ds-stats" draggable="true">
+      <div class="drag-handle" data-label="⬡ SYSTEM"><span class="grip">⠿</span></div>
+      <div id="stats-section">
+        <div class="stat-row"><span class="stat-label">CPU</span><div class="stat-bar"><div class="stat-fill c" id="cpu-bar" style="width:0%"></div></div><span class="stat-val" id="cpu-val">0%</span></div>
+        <div class="stat-row"><span class="stat-label">MEM</span><div class="stat-bar"><div class="stat-fill a" id="mem-bar" style="width:0%"></div></div><span class="stat-val" id="mem-val">0%</span></div>
+        <div class="stat-row"><span class="stat-label">NET</span><div class="stat-bar"><div class="stat-fill g" id="net-bar" style="width:0%"></div></div><span class="stat-val" id="net-val">0%</span></div>
+        <div class="stat-row"><span class="stat-label">BAT</span><div class="stat-bar"><div class="stat-fill c" id="bat-bar" style="width:0%"></div></div><span class="stat-val" id="bat-val">—%</span></div>
+      </div>
+    </div>
+    <div class="dsec" id="ds-rss" draggable="true">
+      <div class="drag-handle" data-label="⬡ RSS FEEDS"><span class="grip">⠿</span></div>
+      <div id="rss-section">
+        <div id="rss-add-row"><input id="rss-url-in" type="url" placeholder="https://feeds.site.com/rss"/><button id="rss-add-btn">+ ADD</button></div>
+        <div id="feed-list"></div>
+      </div>
+    </div>
+  </div>
+  <!-- RIGHT PANEL -->
+  <div class="panel" id="right-panel">
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div id="news-header">
+      <div id="news-title">◈ LIVE INTEL FEED</div>
+      <div id="news-hcontrols">
+        <span id="article-count">0 ARTICLES</span>
+        <button class="btn" id="sel-all-btn">☑ ALL</button>
+        <button class="btn" id="desel-btn">☐ NONE</button>
+        <button class="btn primary" id="load-btn">↻ LOAD</button>
+      </div>
+    </div>
+    <div id="toggle-strip">
+      <button class="tog on" id="tog-refresh"><span class="tog-dot"></span>AUTO-REFRESH</button>
+      <span class="tog-sep">│</span>
+      <button class="tog" id="tog-compact"><span class="tog-dot"></span>COMPACT</button>
+      <button class="tog on" id="tog-images"><span class="tog-dot"></span>IMAGES</button>
+      <button class="tog on" id="tog-theme"><span class="tog-dot"></span><span id="theme-label">DARK</span></button>
+      <button id="pwa-btn">⬇ INSTALL APP</button>
+    </div>
+    <div id="cat-tabs">
+      <button class="cat-tab active" data-cat="ALL">ALL <span class="cat-badge" id="badge-ALL">0</span></button>
+      <button class="cat-tab" data-cat="TECH">⚙ TECH <span class="cat-badge" id="badge-TECH">0</span></button>
+      <button class="cat-tab" data-cat="POLITICS">🏛 POLITICS <span class="cat-badge" id="badge-POLITICS">0</span></button>
+      <button class="cat-tab" data-cat="SPORTS">🏆 SPORTS <span class="cat-badge" id="badge-SPORTS">0</span></button>
+      <button class="cat-tab" data-cat="FINANCE">📈 FINANCE <span class="cat-badge" id="badge-FINANCE">0</span></button>
+      <button class="cat-tab" data-cat="OTHER">◈ OTHER <span class="cat-badge" id="badge-OTHER">0</span></button>
+    </div>
+    <div id="news-feed"><div id="news-status" class="blinking">▶ INITIALISING…</div></div>
+  </div>
+</div>
+<div id="statusbar">
+  <span><span class="sdot"></span>NEXUS v3 ONLINE</span>
+  <span id="sb-up">UP: 0s</span>
+  <span id="sb-art">READY</span>
+  <span id="sb-cat">CAT: ALL</span>
+  <span id="sb-tz">—</span>
+</div>
+<script>
+'use strict';
+const DEFAULT_FEEDS=[
+  {name:'BBC World',url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
+  {name:'Reuters',url:'https://feeds.reuters.com/reuters/topNews'},
+  {name:'Al Jazeera',url:'https://www.aljazeera.com/xml/rss/all.xml'},
+  {name:'India Today',url:'https://www.indiatoday.in/rss/1206578'},
+  {name:'NDTV Top',url:'https://feeds.feedburner.com/ndtvnews-top-stories'},
+  {name:'Hacker News',url:'https://hnrss.org/frontpage'},
+  {name:'TechCrunch',url:'https://techcrunch.com/feed/'},
+  {name:'Wired',url:'https://www.wired.com/feed/rss'},
+  {name:'The Guardian',url:'https://www.theguardian.com/world/rss'},
+  {name:'NASA',url:'https://www.nasa.gov/rss/dyn/breaking_news.rss'},
+];
+const RSS2JSON='https://api.rss2json.com/v1/api.json?rss_url=';
+let feeds=JSON.parse(localStorage.getItem('nx3-feeds')||'null')||DEFAULT_FEEDS;
+let settings=JSON.parse(localStorage.getItem('nx3-settings')||'{}');
+let secOrder=JSON.parse(localStorage.getItem('nx3-order')||'null')||['ds-clock','ds-weather','ds-stats','ds-rss'];
+let allArticles=[];
+let activeCategory='ALL';
+let autoRefreshTimer=null;
+let startTime=Date.now();
+let deferredInstall=null;
+if(settings.autoRefresh===undefined) settings.autoRefresh=true;
+if(settings.compact===undefined)     settings.compact=false;
+if(settings.images===undefined)      settings.images=true;
+if(settings.theme===undefined)       settings.theme='dark';
+if(settings.wxCity===undefined)      settings.wxCity='Rohtak';
+function saveSettings(){localStorage.setItem('nx3-settings',JSON.stringify(settings))}
+function saveFeeds(){localStorage.setItem('nx3-feeds',JSON.stringify(feeds))}
+
+// AUTO-CATEGORIZATION
+function categorize(title,desc){
+  const t=((title||'')+' '+(desc||'')).toLowerCase();
+  if(/\b(ai|artificial intelligence|tech|software|hardware|apple|google|microsoft|meta|cyber|hack|robot|startup|app|chip|nvidia|openai|algorithm|quantum|5g|elon|tesla|iphone|android|gaming|developer|cloud|machine learning|neural|gpt|llm|semiconductor)\b/.test(t)) return 'TECH';
+  if(/\b(election|government|president|prime minister|minister|parliament|senate|congress|policy|vote|war|military|protest|democracy|coup|sanctions|nato|un|modi|biden|trump|political|diplomacy|treaty|conflict|ceasefire|russia|ukraine|israel|terror|refugee)\b/.test(t)) return 'POLITICS';
+  if(/\b(cricket|football|soccer|tennis|basketball|nba|ipl|match|tournament|league|player|team|score|goal|champion|medal|olympic|fifa|formula|f1|racing|sport|athlete|bat|bowl|wicket|grand prix|world cup|transfer|club|squad)\b/.test(t)) return 'SPORTS';
+  if(/\b(stock|market|economy|gdp|inflation|rupee|dollar|euro|crypto|bitcoin|ethereum|bank|invest|fund|trade|forex|rbi|fed|interest rate|earnings|revenue|budget|sensex|nifty|nasdaq|dow|share|equity|ipo|venture|merger|acquisition|recession)\b/.test(t)) return 'FINANCE';
+  return 'OTHER';
+}
+
+function stripHtml(h){return h?(h.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').trim()):''}
+function extractImg(c){if(!c)return'';const m=c.match(/<img[^>]+src=["']([^"']+)["']/i);return m?m[1]:''}
+function timeAgo(d){if(!d)return'';const s=Math.floor((Date.now()-new Date(d))/1000);if(isNaN(s)||s<0)return'';if(s<60)return s+'s AGO';if(s<3600)return Math.round(s/60)+'m AGO';if(s<86400)return Math.round(s/3600)+'h AGO';return Math.round(s/86400)+'d AGO'}
+
+// FEED LIST
+function renderFeedList(){
+  const list=document.getElementById('feed-list');
+  list.innerHTML='';
+  feeds.forEach((feed,i)=>{
+    const row=document.createElement('div');
+    row.className='feed-row';
+    row.innerHTML=`<input type="checkbox" checked data-index="${i}" id="cb${i}"><label class="feed-name" for="cb${i}" title="${feed.url}">${feed.name}</label><button class="feed-del" data-i="${i}">✕</button>`;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.feed-del').forEach(btn=>{
+    btn.addEventListener('click',()=>{feeds.splice(+btn.dataset.i,1);saveFeeds();renderFeedList()});
+  });
+}
+
+function addFeed(){
+  let url=document.getElementById('rss-url-in').value.trim();
+  if(!url)return;
+  if(!url.startsWith('http'))url='https://'+url;
+  if(feeds.find(f=>f.url===url)){document.getElementById('rss-url-in').value='';return}
+  let name='FEED';
+  try{name=new URL(url).hostname.replace('www.','').split('.')[0].toUpperCase()}catch(e){}
+  feeds.push({name,url});saveFeeds();renderFeedList();
+  document.getElementById('rss-url-in').value='';
+}
+document.getElementById('rss-add-btn').addEventListener('click',addFeed);
+document.getElementById('rss-url-in').addEventListener('keydown',e=>{if(e.key==='Enter')addFeed()});
+document.getElementById('sel-all-btn').addEventListener('click',()=>document.querySelectorAll('#feed-list input[type=checkbox]').forEach(cb=>cb.checked=true));
+document.getElementById('desel-btn').addEventListener('click',()=>document.querySelectorAll('#feed-list input[type=checkbox]').forEach(cb=>cb.checked=false));
+
+// LOAD NEWS
+async function loadSelected(){
+  const btn=document.getElementById('load-btn');
+  let statusEl=document.getElementById('news-status');
+  document.querySelectorAll('#news-feed .news-card').forEach(c=>c.remove());
+  if(!statusEl){statusEl=document.createElement('div');statusEl.id='news-status';document.getElementById('news-feed').prepend(statusEl)}
+  statusEl.className='blinking';statusEl.style.display='block';statusEl.textContent='▶ SYNCING FEEDS…';
+  btn.classList.add('spin');btn.textContent='↻ …';
+  const checkboxes=document.querySelectorAll('#feed-list input[type=checkbox]:checked');
+  allArticles=[];
+  for(let cb of checkboxes){
+    const feed=feeds[+cb.dataset.index];if(!feed)continue;
+    try{
+      const res=await fetch(RSS2JSON+encodeURIComponent(feed.url));
+      const data=await res.json();
+      if(!data.items)continue;
+      data.items.slice(0,15).forEach(item=>{
+        let image=item.thumbnail||'';
+        if(!image&&item.enclosure?.link)image=item.enclosure.link;
+        if(!image&&item.content)image=extractImg(item.content);
+        const desc=stripHtml(item.description||'').substring(0,110);
+        const cat=categorize(item.title,item.description);
+        allArticles.push({title:item.title,link:item.link,desc,image,date:item.pubDate,src:feed.name,category:cat});
+      });
+    }catch(e){console.warn('Feed failed:',feed.url)}
+  }
+  allArticles.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  btn.classList.remove('spin');btn.textContent='↻ LOAD';
+  updateBadges();
+  renderArticles(activeCategory);
+}
+document.getElementById('load-btn').addEventListener('click',loadSelected);
+
+function renderArticles(cat){
+  activeCategory=cat;
+  document.getElementById('sb-cat').textContent='CAT: '+cat;
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.toggle('active',t.dataset.cat===cat));
+  document.querySelectorAll('#news-feed .news-card').forEach(c=>c.remove());
+  const statusEl=document.getElementById('news-status');
+  const filtered=cat==='ALL'?allArticles:allArticles.filter(a=>a.category===cat);
+  if(!filtered.length){
+    statusEl.style.display='block';statusEl.className='';
+    statusEl.textContent=allArticles.length?'NO ARTICLES IN THIS CATEGORY':(document.querySelectorAll('#feed-list input:checked').length?'✗ FEEDS FAILED — Try: python -m http.server\nor host files on a server for CORS':'☐ SELECT FEEDS AND CLICK LOAD');
+    document.getElementById('article-count').textContent='0 ARTICLES';
+    document.getElementById('sb-art').textContent='0 ARTICLES';
+    return;
+  }
+  if(statusEl)statusEl.style.display='none';
+  const feed=document.getElementById('news-feed');
+  filtered.forEach((item,idx)=>{
+    const card=document.createElement('a');
+    card.className='news-card cat-accent-'+item.category;
+    card.href=item.link||'#';card.target='_blank';card.rel='noopener noreferrer';
+    card.style.animationDelay=(idx*.02)+'s';
+    card.innerHTML=`${item.image?`<img class="card-img" src="${item.image}" loading="lazy" onerror="this.style.display='none'" alt="">`:''}
+      <div class="card-body">
+        <div class="card-src">${item.src}</div>
+        <div class="card-title">${item.title||'Untitled'}</div>
+        ${item.desc?`<div class="card-desc">${item.desc}…</div>`:''}
+        <div class="card-date">${timeAgo(item.date)} &nbsp;·&nbsp; ${item.category}</div>
+      </div>`;
+    feed.appendChild(card);
+  });
+  const n=filtered.length;
+  document.getElementById('article-count').textContent=n+' ARTICLES';
+  document.getElementById('sb-art').textContent=n+' / '+allArticles.length+' ARTICLES';
+}
+
+function updateBadges(){
+  ['ALL','TECH','POLITICS','SPORTS','FINANCE','OTHER'].forEach(c=>{
+    const el=document.getElementById('badge-'+c);
+    if(el)el.textContent=(c==='ALL'?allArticles:allArticles.filter(a=>a.category===c)).length;
+  });
+}
+document.querySelectorAll('.cat-tab').forEach(tab=>tab.addEventListener('click',()=>renderArticles(tab.dataset.cat)));
+
+// TOGGLES
+function setAutoRefresh(on){
+  settings.autoRefresh=on;saveSettings();
+  document.getElementById('tog-refresh').classList.toggle('on',on);
+  clearInterval(autoRefreshTimer);
+  if(on)autoRefreshTimer=setInterval(loadSelected,5*60*1000);
+}
+function setCompact(on){settings.compact=on;saveSettings();document.getElementById('tog-compact').classList.toggle('on',on);document.body.classList.toggle('compact',on)}
+function setImages(on){settings.images=on;saveSettings();document.getElementById('tog-images').classList.toggle('on',on);document.body.classList.toggle('no-images',!on)}
+function setTheme(t){settings.theme=t;saveSettings();document.documentElement.setAttribute('data-theme',t);document.getElementById('theme-label').textContent=t==='dark'?'DARK':'LIGHT';document.getElementById('tog-theme').classList.toggle('on',t==='dark')}
+document.getElementById('tog-refresh').addEventListener('click',()=>setAutoRefresh(!settings.autoRefresh));
+document.getElementById('tog-compact').addEventListener('click',()=>setCompact(!settings.compact));
+document.getElementById('tog-images').addEventListener('click',()=>setImages(!settings.images));
+document.getElementById('tog-theme').addEventListener('click',()=>setTheme(settings.theme==='dark'?'light':'dark'));
+function applySettings(){setAutoRefresh(settings.autoRefresh);setCompact(settings.compact);setImages(settings.images);setTheme(settings.theme)}
+
+// DRAG & DROP
+let dragSrc=null;
+function initDragDrop(){
+  const panel=document.getElementById('left-panel');
+  secOrder.forEach(id=>{const el=document.getElementById(id);if(el)panel.appendChild(el)});
+  document.querySelectorAll('.dsec').forEach(sec=>{
+    sec.addEventListener('dragstart',e=>{dragSrc=sec;sec.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',sec.id)});
+    sec.addEventListener('dragend',()=>{sec.classList.remove('dragging');document.querySelectorAll('.dsec').forEach(s=>s.classList.remove('drag-over'));saveOrder()});
+    sec.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('.dsec').forEach(s=>s.classList.remove('drag-over'));if(sec!==dragSrc)sec.classList.add('drag-over')});
+    sec.addEventListener('dragleave',()=>sec.classList.remove('drag-over'));
+    sec.addEventListener('drop',e=>{
+      e.preventDefault();
+      if(dragSrc&&dragSrc!==sec){
+        const p=document.getElementById('left-panel');
+        const secs=[...p.querySelectorAll('.dsec')];
+        const si=secs.indexOf(dragSrc),di=secs.indexOf(sec);
+        if(si<di)p.insertBefore(dragSrc,sec.nextSibling);else p.insertBefore(dragSrc,sec);
+      }
+      sec.classList.remove('drag-over');
+    });
+  });
+}
+function saveOrder(){const p=document.getElementById('left-panel');secOrder=[...p.querySelectorAll('.dsec')].map(s=>s.id);localStorage.setItem('nx3-order',JSON.stringify(secOrder))}
+
+// CLOCK
+function updateClock(){
+  const now=new Date();
+  document.getElementById('ch').textContent=String(now.getHours()).padStart(2,'0');
+  document.getElementById('cm').textContent=String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('cs').textContent=String(now.getSeconds()).padStart(2,'0');
+  const DAYS=['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+  const MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  document.getElementById('date-display').textContent=String(now.getDate()).padStart(2,'0')+' '+MON[now.getMonth()]+' '+now.getFullYear();
+  document.getElementById('day-display').textContent=DAYS[now.getDay()];
+  const up=Math.floor((Date.now()-startTime)/1000);
+  document.getElementById('sb-up').textContent='UP: '+Math.floor(up/3600)+'h '+String(Math.floor((up%3600)/60)).padStart(2,'0')+'m '+String(up%60).padStart(2,'0')+'s';
+  document.getElementById('sb-tz').textContent=Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+setInterval(updateClock,1000);updateClock();
+
+// WEATHER
+const WX={'113':'☀️','116':'⛅','119':'☁️','122':'☁️','143':'🌫','176':'🌦','179':'🌨','182':'🌧','200':'⛈','227':'🌨','230':'❄️','263':'🌦','266':'🌧','293':'🌦','296':'🌧','302':'🌧','305':'🌧','308':'🌧','317':'🌧','323':'🌨','338':'❄️','353':'🌦','356':'🌧','386':'⛈','389':'⛈'};
+async function fetchWeather(city){
+  document.getElementById('wx-status').textContent='◌ fetching…';
+  try{
+    const r=await fetch('https://wttr.in/'+encodeURIComponent(city)+'?format=j1');
+    const d=await r.json();const c=d.current_condition[0];const a=d.nearest_area[0];
+    document.getElementById('weather-icon').textContent=WX[c.weatherCode]||'🌡';
+    document.getElementById('weather-temp').textContent=c.temp_C+'°C';
+    document.getElementById('weather-desc').textContent=c.weatherDesc[0].value;
+    document.getElementById('weather-location').textContent=a.areaName[0].value+', '+a.country[0].value;
+    document.getElementById('wd-h').textContent=c.humidity+'%';
+    document.getElementById('wd-w').textContent=c.windspeedKmph+' km/h';
+    document.getElementById('wd-f').textContent=c.FeelsLikeC+'°C';
+    document.getElementById('wd-v').textContent=c.visibility+' km';
+    document.getElementById('wx-status').textContent='✓ '+new Date().toLocaleTimeString();
+    settings.wxCity=city;saveSettings();
+  }catch(e){document.getElementById('wx-status').textContent='✗ failed'}
+}
+document.getElementById('wx-btn').addEventListener('click',()=>{const v=document.getElementById('wx-city').value.trim();if(v)fetchWeather(v)});
+document.getElementById('wx-city').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=e.target.value.trim();if(v)fetchWeather(v)}});
+fetchWeather(settings.wxCity);
+setInterval(()=>fetchWeather(settings.wxCity),10*60*1000);
+
+// STATS
+async function updateStats(){
+  [['cpu',15+Math.random()*42],['mem',25+Math.random()*40],['net',Math.random()*70]].forEach(([id,v])=>{
+    const p=Math.round(v);
+    document.getElementById(id+'-bar').style.width=p+'%';
+    document.getElementById(id+'-val').textContent=p+'%';
+    if(id==='cpu')document.getElementById('cpu-bar').style.boxShadow=p>80?'0 0 8px var(--red)':'';
+  });
+  if(navigator.getBattery){try{const b=await navigator.getBattery();const p=Math.round(b.level*100);document.getElementById('bat-bar').style.width=p+'%';document.getElementById('bat-val').textContent=p+'%';document.getElementById('bat-bar').style.boxShadow=p<20?'0 0 8px var(--red)':''}catch(e){}}
+}
+updateStats();setInterval(updateStats,3000);
+
+// PWA
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js')
+    .then(r=>console.log('SW:',r.scope))
+    .catch(e=>console.warn('SW needs HTTP server:',e));
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;document.getElementById('pwa-btn').style.display='block'});
+document.getElementById('pwa-btn').addEventListener('click',async()=>{if(!deferredInstall)return;deferredInstall.prompt();const{outcome}=await deferredInstall.userChoice;if(outcome==='accepted')document.getElementById('pwa-btn').style.display='none';deferredInstall=null});
+window.addEventListener('appinstalled',()=>document.getElementById('pwa-btn').style.display='none');
+
+// INIT
+applySettings();
+initDragDrop();
+renderFeedList();
+loadSelected();
+</script>
+</body>
+</html>

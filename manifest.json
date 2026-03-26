@@ -1,0 +1,16 @@
+{
+  "name": "NEXUS Dashboard",
+  "short_name": "NEXUS",
+  "description": "Smart cyberpunk news & monitoring dashboard",
+  "start_url": "./smart-dashboard.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#050a12",
+  "theme_color": "#00dcff",
+  "categories": ["news","productivity"],
+  "icons": [
+    { "src": "nexus-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "nexus-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
